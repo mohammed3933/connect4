@@ -1,0 +1,133 @@
+!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect 4 Game</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        margin: 0;
+      }
+      .board {
+        display: grid;
+        grid-template-columns: repeat(7, 60px);
+        grid-gap: 5px;
+        background-color: #3498db;
+        padding: 10px;
+        border-radius: 10px;
+      }
+      .cell {
+        width: 60px;
+        height: 60px;
+        background-color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .cell.red {
+        background-color: red;
+      }
+      .cell.yellow {
+        background-color: yellow;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Connect 4</h1>
+      <div class="board" id="board"></div>
+      <p id="winnerMessage" style="text-align: center; font-size: 1.5em"></p>
+    </div>
+
+    <script>
+      const ROWS = 6
+      const COLUMNS = 7
+      let currentPlayer = 'red'
+      const board = []
+      const boardDiv = document.getElementById('board')
+      const winnerMessage = document.getElementById('winnerMessage')
+
+      function initializeBoard() {
+        boardDiv.innerHTML = ''
+        for (let row = 0; row < ROWS; row++) {
+          board[row] = []
+          for (let col = 0; col < COLUMNS; col++) {
+            board[row][col] = null
+            const cell = document.createElement('div')
+            cell.classList.add('cell')
+            cell.dataset.row = row
+            cell.dataset.col = col
+            boardDiv.appendChild(cell)
+          }
+        }
+        boardDiv.addEventListener('click', handleMove)
+      }
+
+      function handleMove(event) {
+        const col = parseInt(event.target.dataset.col)
+        if (!isNaN(col)) {
+          for (let row = ROWS - 1; row >= 0; row--) {
+            if (!board[row][col]) {
+              board[row][col] = currentPlayer
+              const cell = boardDiv.children[row * COLUMNS + col]
+              cell.classList.add(currentPlayer)
+              if (checkWin(row, col)) {
+                winnerMessage.textContent = `${currentPlayer.toUpperCase()} Wins!`
+                boardDiv.removeEventListener('click', handleMove)
+              } else {
+                currentPlayer = currentPlayer === 'red' ? 'yellow' : 'red'
+              }
+              break
+            }
+          }
+        }
+      }
+
+      function checkWin(row, col) {
+        return (
+          checkDirection(row, col, 1, 0) ||
+          checkDirection(row, col, 0, 1) ||
+          checkDirection(row, col, 1, 1) ||
+          checkDirection(row, col, 1, -1)
+        )
+      }
+
+      function checkDirection(row, col, rowDelta, colDelta) {
+        let count = 1
+        count += countInDirection(row, col, rowDelta, colDelta)
+        count += countInDirection(row, col, -rowDelta, -colDelta)
+        return count >= 4
+      }
+
+      function countInDirection(row, col, rowDelta, colDelta) {
+        let count = 0
+        let r = row + rowDelta
+        let c = col + colDelta
+        while (
+          r >= 0 &&
+          r < ROWS &&
+          c >= 0 &&
+          c < COLUMNS &&
+          board[r][c] === currentPlayer
+        ) {
+          count++
+          r += rowDelta
+          c += colDelta
+        }
+        return count
+      }
+
+      initializeBoard()
+    </script>
+  </body>
+</html>
